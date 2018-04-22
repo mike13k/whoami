@@ -23,6 +23,7 @@ known_face_encodings = []
 known_face_names = []
 smiles = []
 count = []
+isFirst = []
 #
 # # Load sample pictures and learn how to recognize it.
 # for pic in pics:
@@ -33,6 +34,8 @@ count = []
 #         known_face_encodings.append(img_encoding)
 #         known_face_names.append('Prof. Dr. Slim Abdennadher')
 #         smiles.append(False)
+#         count.append(12)
+#         isFirst.append(True)
 #
 #
 # ## Prof. Dr. Ashraf Mansour
@@ -50,6 +53,8 @@ count = []
 #         known_face_encodings.append(img_encoding)
 #         known_face_names.append('Prof. Dr. Ashraf Mansour')
 #         smiles.append(False)
+#         count.append(12)
+#         isFirst.append(True)
 
 ## Michael Khalil
 os.chdir(owd)
@@ -67,6 +72,7 @@ for pic in pics:
         known_face_names.append('Michael Khalil')
         smiles.append(False)
         count.append(12)
+        isFirst.append(True)
 
 
 # Initialize some variables
@@ -103,7 +109,9 @@ while True:
             if True in matches:
                 first_match_index = matches.index(True)
                 name = known_face_names[first_match_index]
-                if(not smiles[first_match_index]):
+                if (process_this_frame):
+                    count[first_match_index] = count[first_match_index] - 1
+                if(not smiles[first_match_index] and count[first_match_index] <= 1):
                     # big_frame = cv2.resize(frame, (0, 0), fx=2.0, fy=2.0)
                     # rgb_big_frame = big_frame[:, :, ::-1].copy(order='C')
                     os.chdir(owd)
@@ -112,6 +120,7 @@ while True:
                         image_to_annotate = f.read()
                     smiles[first_match_index] = annotate.annotate_image(image_to_annotate)
                     print(smiles[first_match_index])
+
 
             face_names.append(name)
 
@@ -151,7 +160,20 @@ while True:
                 # Draw a label with a name below the face
                 cv2.rectangle(frame, (left, bottom - 35), (right, bottom), color, cv2.FILLED)
                 font = cv2.FONT_HERSHEY_DUPLEX
-                cv2.putText(frame, 'Hello ' + name + ', I heard you have the best smile', (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+                if (count[index] <= 6 and count[index] > 1):
+                    print (count[index]//2)
+                    cv2.putText(frame, 'Please smile in ' + `count[index]//2`, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+                elif (count[index] <= 1):
+                        count[first_match_index] = 12
+                        isFirst[first_match_index] = False
+                        cv2.putText(frame, 'I know you can do better than this',
+                                    (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+                else:
+                    if isFirst[first_match_index]:
+                        cv2.putText(frame, 'Hello ' + name + ', I heard you have the best smile', (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+                    else:
+                        cv2.putText(frame, 'I know you can do better than this',
+                                    (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
         else:
             # Draw a box around the face
             cv2.rectangle(frame, (left, top), (right, bottom), color, 2)
