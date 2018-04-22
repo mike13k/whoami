@@ -16,23 +16,26 @@ def annotate_image(image):
     conn = httplib.HTTPSConnection('westcentralus.api.cognitive.microsoft.com')
     conn.request("POST", "/face/v1.0/detect?%s" % params, image, headers)
 
-    response = conn.getresponse("")
-    data = response.read()
-    data = data[1:-1]
-    print(data)
-    if len(data) > 3:
-        face = json.loads(data)
-        if 'error' not in face:
-            attributes = face["faceAttributes"]
-            conn.close()
-            if attributes["smile"] > 0.6:
-                return True
+    response = conn.getresponse()
+    data = response.read().decode('utf-8')
+    jsonData = json.loads(data)
+    # data = data[1:-1]
+    print(jsonData)
+    if jsonData != []:
+        if 'error' not in jsonData:
+            face = jsonData[0]
+            if 'error' not in face:
+                attributes = face["faceAttributes"]
+                conn.close()
+                print attributes["smile"]
+                if attributes["smile"] > 0.6:
+                    return True
+                else:
+                    return False
             else:
                 return False
         else:
             return False
-    else:
-        return False
 
     # response = requests.post(face_api_url, params=params, headers=headers, data=image_url)
     # faces = response.json()
